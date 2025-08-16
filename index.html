@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Autoplay Video with Click-to-Play & Audio</title>
+<title>Fast Creative GSAP Video</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -19,18 +18,19 @@
   .stage {
     position: relative;
     width: 100%;
-    max-width: 680px;
+    max-width: 500px;
     aspect-ratio: 1080/1350;
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-  video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-    display: block;
+  .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.1);
   }
   .overlay {
     position: absolute;
@@ -43,7 +43,7 @@
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    z-index: 2;
+    z-index: 3;
   }
   .hidden { display: none; }
 </style>
@@ -51,37 +51,58 @@
 <body>
 
 <div class="stage">
-  <video id="promoVideo" autoplay muted playsinline>
-    <source src="./task.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <div id="playOverlay" class="overlay">▶ Click to Play with Sound</div>
+  <!-- 6 Slides -->
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1549887534-5a9ee5e29d3d?auto=format&fit=crop&w=800&q=80')"></div>
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80')"></div>
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80')"></div>
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1522202223701-5b8eafbe7dd7?auto=format&fit=crop&w=800&q=80')"></div>
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')"></div>
+  <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=800&q=80')"></div>
+
+  <!-- Overlay -->
+  <div id="playOverlay" class="overlay">▶ Click to Start</div>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    Your browser does not support the audio tag.
+  </audio>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
-  const video = document.getElementById('promoVideo');
+  const slides = document.querySelectorAll('.slide');
   const overlay = document.getElementById('playOverlay');
+  const audio = document.getElementById('bgMusic');
+  let tl;
+  let isPlaying = false;
 
-  // First click: unmute and play
-  overlay.addEventListener('click', () => {
-    video.muted = false;
-    video.play();
+  function startAnimation() {
     overlay.classList.add('hidden');
-  });
+    audio.play();
+    isPlaying = true;
 
-  // Toggle play/pause on video click after starting
-  video.addEventListener('click', () => {
-    if (!overlay.classList.contains('hidden')) return; // ignore if overlay is visible
-    if (video.paused) {
-      video.play();
+    tl = gsap.timeline({ repeat: -1 });
+    slides.forEach((slide, i) => {
+      tl.to(slide, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, i)
+        .to(slide, { opacity: 0, scale: 1.15, duration: 0.8, ease: "power2.in" }, i + 0.8);
+    });
+  }
+
+  // Toggle Play/Pause when clicking anywhere
+  document.querySelector(".stage").addEventListener("click", () => {
+    if (!isPlaying) {
+      startAnimation();
     } else {
-      video.pause();
+      if (tl.isActive()) {
+        tl.pause();
+        audio.pause();
+      } else {
+        tl.resume();
+        audio.play();
+      }
     }
   });
-
-  // Fade in animation
-  gsap.from(".stage", { opacity: 0, scale: 0.9, duration: 1, ease: "power3.out" });
 </script>
 
 </body>
